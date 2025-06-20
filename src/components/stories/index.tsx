@@ -1,63 +1,55 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useSWR from "swr";
 import type { Story } from "../../types/story";
 import StoryCard from "./StoryCard";
+import Loader from "../loader";
 import "./stories.scss";
-import Loader from "./Loader";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+const getRandomIdArray = (data: number[], count: number) => {
+  const result = new Set<number>();
+  while (result.size < count && result.size < data.length) {
+    const index = Math.floor(Math.random() * data.length);
+    result.add(data[index]);
+  }
+  return Array.from(result);
+};
 
 const Stories = () => {
-  const fetcher = (...args: Parameters<typeof fetch>) =>
-    fetch(...args).then((res) => res.json());
-
-  const [stories, setStories] = useState<Story[]>([]);
-  const [isLoadingStories, setIsLoadingStories] = useState<boolean>(false);
-  const [errorStories, setErrorStories] = useState<boolean>(false);
-
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading } = useSWR<number[]>(
     "https://hacker-news.firebaseio.com/v0/topstories.json",
     fetcher,
-    {
-      revalidateOnFocus: false,
-    }
+    { revalidateOnFocus: false }
   );
 
-  useEffect(() => {
-    if (!data) return;
-    setIsLoadingStories(true);
-    const idArray = getRandomIdArray(data, 10);
-    fetchStories(idArray);
-  }, [data]);
+  const [stories, setStories] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const getRandomIdArray = (data: number[], count: number) => {
-    const result = new Set<number>();
-
-    while (result.size < count) {
-      const index = Math.floor(Math.random() * data.length);
-      result.add(data[index]);
-    }
-
-    return Array.from(result);
-  };
-
-  const fetchStories = async (idArray: number[]) => {
+  const fetchStories = useCallback(async (ids: number[]) => {
+    setLoading(true);
     try {
-      const storyPromises = idArray.map((id) =>
+      const storyPromises = ids.map((id) =>
         fetcher(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
       );
-
-      const fetchedStories = await Promise.all(storyPromises);
-      fetchedStories.sort((a, b) => a.score - b.score);
-      setStories(fetchedStories);
-      setIsLoadingStories(false);
+      const fetchedStories: Story[] = await Promise.all(storyPromises);
+      setStories(fetchedStories.sort((a, b) => a.score - b.score));
     } catch (err) {
-      console.error("Failed to fetch random stories:", err);
-      setErrorStories(true);
+      setStories([]);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  if (error || errorStories) return "Error";
+  useEffect(() => {
+    if (data) {
+      const idArray = getRandomIdArray(data, 10);
+      fetchStories(idArray);
+    }
+  }, [data, fetchStories]);
 
-  if (isLoading || isLoadingStories) return <Loader />;
+  if (error) return <>Error</>;
+  if (isLoading || loading) return <Loader />;
 
   return (
     <div className="container story-grid">

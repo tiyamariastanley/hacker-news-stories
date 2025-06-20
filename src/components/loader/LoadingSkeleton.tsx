@@ -1,4 +1,4 @@
-import "./LoadingSkeleton.scss";
+import "./Loading.scss";
 
 const LoadingSkeleton = () => {
   return (
