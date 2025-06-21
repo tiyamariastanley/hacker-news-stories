@@ -1,0 +1,15 @@
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    border: 1px solid #515c89;
+    border-radius: 24px;
+    padding: 0.3rem 1rem;
+    width: fit-content;
+    color: #515c89;
+    cursor: pointer;
+  }
+}

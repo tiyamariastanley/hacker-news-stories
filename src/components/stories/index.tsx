@@ -4,17 +4,9 @@ import type { Story } from "../../types/story";
 import StoryCard from "./StoryCard";
 import Loader from "../loader";
 import "./stories.scss";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-const getRandomIdArray = (data: number[], count: number) => {
-  const result = new Set<number>();
-  while (result.size < count && result.size < data.length) {
-    const index = Math.floor(Math.random() * data.length);
-    result.add(data[index]);
-  }
-  return Array.from(result);
-};
+import { fetcher } from "../../lib/fetcher";
+import { getRandomIdArray } from "../../util";
+import Error from "../error";
 
 const Stories = () => {
   const { data, error, isLoading } = useSWR<number[]>(
@@ -24,10 +16,11 @@ const Stories = () => {
   );
 
   const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingStories, setLoadingStories] = useState(false);
+  const [errorStories, setErrorStories] = useState<unknown>(null);
 
   const fetchStories = useCallback(async (ids: number[]) => {
-    setLoading(true);
+    setLoadingStories(true);
     try {
       const storyPromises = ids.map((id) =>
         fetcher(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
@@ -35,9 +28,9 @@ const Stories = () => {
       const fetchedStories: Story[] = await Promise.all(storyPromises);
       setStories(fetchedStories.sort((a, b) => a.score - b.score));
     } catch (err) {
-      setStories([]);
+      setErrorStories(err);
     } finally {
-      setLoading(false);
+      setLoadingStories(false);
     }
   }, []);
 
@@ -48,8 +41,9 @@ const Stories = () => {
     }
   }, [data, fetchStories]);
 
-  if (error) return <>Error</>;
-  if (isLoading || loading) return <Loader />;
+  if (error || errorStories) return <Error errorMessage={error.message} />;
+
+  if (isLoading || loadingStories) return <Loader />;
 
   return (
     <div className="container story-grid">

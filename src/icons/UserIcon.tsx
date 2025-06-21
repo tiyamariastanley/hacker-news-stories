@@ -1,21 +1,21 @@
-const ClockIcon = () => {
+const UserIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="#515c89"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="lucide lucide-clock3-icon lucide-clock-3"
+      className="lucide lucide-user-round-icon lucide-user-round"
     >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16.5 12" />
+      <circle cx="12" cy="8" r="5" />
+      <path d="M20 21a8 8 0 0 0-16 0" />
     </svg>
   );
 };
 
-export default ClockIcon;
+export default UserIcon;

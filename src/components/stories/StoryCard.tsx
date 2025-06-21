@@ -4,12 +4,12 @@ import { formatDistanceToNow } from "date-fns";
 import ArrowIcon from "../../icons/ArrowIcon";
 import ClockIcon from "../../icons/ClockIcon";
 import LoadingSkeleton from "../loader/LoadingSkeleton";
+import { fetcher } from "../../lib/fetcher";
+import UserIcon from "../../icons/UserIcon";
 
 interface Props {
   data: Story;
 }
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const StoryCard = ({ data }: Props) => {
   const {
@@ -27,21 +27,21 @@ const StoryCard = ({ data }: Props) => {
   return (
     <div className="story-card">
       <div className="image">
-        <img src="/dummy-image.webp" alt="story" />
+        <img src="/dummy-image.webp" alt="story-image" />
       </div>
       <div className="details">
         <a href={data.url} target="_blank" rel="noopener noreferrer">
           {data.title}
         </a>
-        <p>
-          Posted by <b>{data.by}</b> (
+        <div className="icon-info">
+          <UserIcon /> <b>{data.by}</b> (
           {user.karma !== undefined
             ? new Intl.NumberFormat("da-DK", {
                 maximumSignificantDigits: 3,
               }).format(user.karma)
             : "N/A"}{" "}
           points)
-        </p>
+        </div>
         <p className="description">
           Lorem Ipsum is simply dummy text of the printing and typesetting
           industry. Lorem Ipsum has been the industry's standard dummy text ever
@@ -52,7 +52,7 @@ const StoryCard = ({ data }: Props) => {
           <span className="meta">
             <ArrowIcon /> {data.score}
           </span>
-          <span className="time">
+          <span className="icon-info">
             <ClockIcon />{" "}
             {formatDistanceToNow(new Date(data.time * 1000), {
               addSuffix: true,

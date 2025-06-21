@@ -82,32 +82,38 @@
 }
 
 .title-bar {
-  height: 1.25rem;
-  width: 80%;
-  border-radius: 9999px;
-  background-color: #f3f4f7;
-  animation: skeleton-loading 1s linear infinite alternate;
-}
-
-.date-bar {
-  height: 0.75rem;
-  width: 60%;
+  height: 1rem;
+  width: 100%;
   border-radius: 9999px;
   background-color: #f3f4f7;
   animation: skeleton-loading 1s linear infinite alternate;
 }
 
 .meta-bar {
-  height: 0.75rem;
-  width: 40%;
+  height: 0.5rem;
+  width: 60%;
   border-radius: 9999px;
   background-color: #f3f4f7;
   animation: skeleton-loading 1s linear infinite alternate;
 }
 
 .desc-bar {
-  height: 0.75rem;
+  height: 1rem;
   width: 100%;
+  border-radius: 9999px;
+  background-color: #f3f4f7;
+  animation: skeleton-loading 1s linear infinite alternate;
+}
+
+.date-bar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.date-bar {
+  height: 0.5rem;
+  width: 20%;
   border-radius: 9999px;
   background-color: #f3f4f7;
   animation: skeleton-loading 1s linear infinite alternate;
