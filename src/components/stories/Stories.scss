@@ -50,7 +50,7 @@
   }
 
   @media (min-width: 1024px) {
-    &:not(:nth-child(3n)):not(:nth-last-child(-n + 2))::after {
+    &:not(:nth-child(3n)):not(:nth-last-child(-n + 1))::after {
       content: "";
       position: absolute;
       top: 0;
