@@ -3,10 +3,10 @@ import useSWR from "swr";
 import type { Story } from "../../types/story";
 import StoryCard from "./StoryCard";
 import Loader from "../loader";
-import "./stories.scss";
-import { fetcher } from "../../lib/fetcher";
+import { fetcher } from "../../util/fetcher";
 import { getRandomIdArray } from "../../util";
 import Error from "../error";
+import "./stories.scss";
 
 const Stories = () => {
   const { data, error, isLoading } = useSWR<number[]>(
@@ -37,6 +37,7 @@ const Stories = () => {
   useEffect(() => {
     if (data) {
       const idArray = getRandomIdArray(data, 10);
+
       fetchStories(idArray);
     }
   }, [data, fetchStories]);

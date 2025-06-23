@@ -1,5 +1,5 @@
-import LoadingSkeleton from "./LoadingSkeleton";
-import "./Loading.scss";
+import LoadingSkeleton from "./LoaderSkeleton";
+import "./Loader.scss";
 
 const Loader = () => {
   return (

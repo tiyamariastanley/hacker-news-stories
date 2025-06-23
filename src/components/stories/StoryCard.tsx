@@ -3,8 +3,7 @@ import useSWR from "swr";
 import { formatDistanceToNow } from "date-fns";
 import ArrowIcon from "../../icons/ArrowIcon";
 import ClockIcon from "../../icons/ClockIcon";
-import LoadingSkeleton from "../loader/LoadingSkeleton";
-import { fetcher } from "../../lib/fetcher";
+import { fetcher } from "../../util/fetcher";
 import UserIcon from "../../icons/UserIcon";
 
 interface Props {
@@ -21,26 +20,26 @@ const StoryCard = ({ data }: Props) => {
     fetcher
   );
 
-  if (error) return <div>Error</div>;
-  if (isLoading || !user) return <LoadingSkeleton />;
-
   return (
     <div className="story-card">
       <div className="image">
-        <img src="/dummy-image.webp" alt="story-image" />
+        <img src="/image.png" alt="story-image" />
       </div>
       <div className="details">
         <a href={data.url} target="_blank" rel="noopener noreferrer">
           {data.title}
         </a>
         <div className="icon-info">
-          <UserIcon /> <b>{data.by}</b> (
-          {user.karma !== undefined
-            ? new Intl.NumberFormat("da-DK", {
-                maximumSignificantDigits: 3,
-              }).format(user.karma)
-            : "N/A"}{" "}
-          points)
+          <UserIcon /> <b>{data.by}</b>
+          {isLoading ? (
+            <span className="date-bar skeleton-bar"></span>
+          ) : error ? (
+            <span style={{ color: "#999" }}>(Failed to load karma)</span>
+          ) : user ? (
+            <span>({user.karma.toLocaleString()} karma)</span>
+          ) : (
+            <span>(N/A)</span>
+          )}
         </div>
         <p className="description">
           Lorem Ipsum is simply dummy text of the printing and typesetting

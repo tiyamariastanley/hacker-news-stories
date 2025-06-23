@@ -4,7 +4,7 @@ export interface Story {
   id: number;
   kids: number[];
   score: number;
-  time: 1750171646;
+  time: number;
   title: string;
   type: string;
   url: string;

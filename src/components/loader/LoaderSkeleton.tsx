@@ -1,6 +1,6 @@
-import "./Loading.scss";
+import "./Loader.scss";
 
-const LoadingSkeleton = () => {
+const LoaderSkeleton = () => {
   return (
     <div className="loading-card" data-testid="loader-skeleton">
       <div className="image" />
@@ -17,4 +17,4 @@ const LoadingSkeleton = () => {
   );
 };
 
-export default LoadingSkeleton;
+export default LoaderSkeleton;

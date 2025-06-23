@@ -4,5 +4,6 @@ export const getRandomIdArray = (data: number[], count: number) => {
     const index = Math.floor(Math.random() * data.length);
     result.add(data[index]);
   }
+
   return Array.from(result);
 };
