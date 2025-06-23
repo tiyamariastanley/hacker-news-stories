@@ -4,13 +4,14 @@ import "@testing-library/jest-dom";
 import { formatDistanceToNow } from "date-fns";
 import Stories from ".";
 import useSWR from "swr";
+import StoryCard from "./StoryCard";
 
 const mockStories = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
   title: `Story Title ${i + 1}`,
   by: `Author ${i + 1}`,
   score: 100 - i,
-  url: `https://example.com/story-${i + 1}`,
+  url: `https://hacker-news.firebaseio.com/v0/item/${i + 1}.json`,
   time: 1750171646,
   descendants: 0,
   kids: [],
@@ -61,7 +62,7 @@ beforeEach(() => {
 });
 
 describe("Stories", () => {
-  it("renders loading component", async () => {
+  test("renders loading component", async () => {
     mockedUseSWR.mockReturnValue({
       data: undefined,
       error: undefined,
@@ -73,7 +74,7 @@ describe("Stories", () => {
     expect(loaderElements.length).toBe(10);
   });
 
-  it("renders error component", async () => {
+  test("renders error component", async () => {
     mockedUseSWR.mockReturnValue({
       data: undefined,
       error: { message: "Failed to fetch stories" },
@@ -87,20 +88,53 @@ describe("Stories", () => {
     expect(screen.getByText(/Failed to fetch stories/i)).toBeInTheDocument();
   });
 
-  it("renders story card details", async () => {
+  test("renders stories", async () => {
     render(<Stories />);
+    const storyCards = await screen.findAllByTestId("story-card");
+    expect(storyCards.length).toBe(10);
+  });
+});
 
-    for (const story of mockStories) {
-      const expectedText = formatDistanceToNow(new Date(story.time * 1000), {
-        addSuffix: true,
-      });
-      expect(await screen.findByText(story.title)).toBeInTheDocument();
-      expect(await screen.findByText(story.by)).toBeInTheDocument();
-      expect(await screen.findByText(String(story.score))).toBeInTheDocument();
-      expect((await screen.findAllByText(expectedText)).length).toBeGreaterThan(
-        1
-      );
-    }
-    expect((await screen.findAllByText(/42 score/i)).length).toBeGreaterThan(1);
+describe("Story Card", () => {
+  test("renders loading component", async () => {
+    mockedUseSWR.mockReturnValue({
+      data: undefined,
+      error: undefined,
+      isLoading: true,
+    });
+
+    render(<StoryCard data={mockStories[0]} />);
+    const loaderElements = await screen.findAllByTestId("karma-loader");
+    expect(loaderElements.length).toBe(1);
+  });
+
+  test("renders error component", async () => {
+    mockedUseSWR.mockReturnValue({
+      data: undefined,
+      error: { message: "Failed to fetch stories" },
+      isLoading: false,
+    });
+
+    render(<StoryCard data={mockStories[0]} />);
+    expect(screen.getByText(/Failed to load karma/i)).toBeInTheDocument();
+  });
+
+  test("renders story card details", async () => {
+    mockedUseSWR.mockReturnValue({
+      data: { id: "Author 1", karma: 42 },
+      error: undefined,
+      isLoading: false,
+    });
+
+    render(<StoryCard data={mockStories[0]} />);
+
+    const expectedText = formatDistanceToNow(new Date(1750171646 * 1000), {
+      addSuffix: true,
+    });
+    expect(await screen.findByText("Story Title 1")).toBeInTheDocument();
+    expect(await screen.findByText("Author 1")).toBeInTheDocument();
+    expect(await screen.findByText("100")).toBeInTheDocument();
+    expect(await screen.findByText(expectedText)).toBeInTheDocument();
+    expect(await screen.findByText(/42 karma/i)).toBeInTheDocument();
   });
 });

@@ -21,7 +21,7 @@ const StoryCard = ({ data }: Props) => {
   );
 
   return (
-    <div className="story-card">
+    <div className="story-card" data-testid="story-card">
       <div className="image">
         <img src="/image.png" alt="story-image" />
       </div>
@@ -32,13 +32,14 @@ const StoryCard = ({ data }: Props) => {
         <div className="icon-info">
           <UserIcon /> <b>{data.by}</b>
           {isLoading ? (
-            <span className="date-bar skeleton-bar"></span>
+            <span
+              className="date-bar skeleton-bar"
+              data-testid="karma-loader"
+            ></span>
           ) : error ? (
             <span style={{ color: "#999" }}>(Failed to load karma)</span>
-          ) : user ? (
-            <span>({user.karma.toLocaleString()} karma)</span>
           ) : (
-            <span>(N/A)</span>
+            <span>({user.karma.toLocaleString()} karma)</span>
           )}
         </div>
         <p className="description">
