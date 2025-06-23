@@ -23,7 +23,7 @@ const StoryCard = ({ data }: Props) => {
   return (
     <div className="story-card" data-testid="story-card">
       <div className="image">
-        <img src="/image.png" alt="story-image" />
+        <img src="/dummy-image.png" alt="story-image" />
       </div>
       <div className="details">
         <a href={data.url} target="_blank" rel="noopener noreferrer">
