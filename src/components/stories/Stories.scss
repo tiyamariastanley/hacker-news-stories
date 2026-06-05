@@ -1,3 +1,14 @@
+.search-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #515c89;
+  font-size: 1rem;
+
+  p {
+    margin: 0;
+  }
+}
+
 .story-grid {
   display: grid;
   gap: 4rem;

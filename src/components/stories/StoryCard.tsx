@@ -1,9 +1,7 @@
 import type { Story } from "../../types/story";
-import useSWR from "swr";
 import { formatDistanceToNow } from "date-fns";
 import ArrowIcon from "../../icons/ArrowIcon";
 import ClockIcon from "../../icons/ClockIcon";
-import { fetcher } from "../../util/fetcher";
 import UserIcon from "../../icons/UserIcon";
 
 interface Props {
@@ -11,15 +9,6 @@ interface Props {
 }
 
 const StoryCard = ({ data }: Props) => {
-  const {
-    data: user,
-    error,
-    isLoading,
-  } = useSWR(
-    data ? `https://hacker-news.firebaseio.com/v0/user/${data.by}.json` : null,
-    fetcher
-  );
-
   return (
     <div className="story-card" data-testid="story-card">
       <div className="image">
@@ -31,16 +20,7 @@ const StoryCard = ({ data }: Props) => {
         </a>
         <div className="icon-info">
           <UserIcon /> <b>{data.by}</b>
-          {isLoading ? (
-            <span
-              className="date-bar skeleton-bar"
-              data-testid="karma-loader"
-            ></span>
-          ) : error ? (
-            <span style={{ color: "#999" }}>(Failed to load karma)</span>
-          ) : (
-            <span>({user.karma.toLocaleString()} karma)</span>
-          )}
+          <span>({data.descendants.toLocaleString()} comments)</span>
         </div>
         <p className="description">
           Lorem Ipsum is simply dummy text of the printing and typesetting

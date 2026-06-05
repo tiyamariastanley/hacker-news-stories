@@ -32,9 +32,7 @@ describe("fetcher function", () => {
       json: () => Promise.resolve(mockRes),
     });
 
-    const res = await fetcher(
-      "https://hacker-news.firebaseio.com/v0/topstories.json"
-    );
+    const res = await fetcher("https://hn.algolia.com/api/v1/search");
     expect(res).toEqual(mockRes);
   });
 
@@ -45,9 +43,7 @@ describe("fetcher function", () => {
       json: () => Promise.resolve("Not Found"),
     });
 
-    await expect(
-      fetcher("https://hacker-news.firebaseio.com/v0/topstories.json")
-    ).rejects.toMatchObject({
+    await expect(fetcher("https://hn.algolia.com/api/v1/search")).rejects.toMatchObject({
       message: "An error occurred while fetching the data.",
       info: "Not Found",
       status: 404,

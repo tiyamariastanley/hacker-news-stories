@@ -1,22 +1,36 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, expect, it, vi, describe } from "vitest";
+import { beforeEach, expect, vi, describe, test } from "vitest";
 import "@testing-library/jest-dom";
 import { formatDistanceToNow } from "date-fns";
 import Stories from ".";
 import useSWR from "swr";
 import StoryCard from "./StoryCard";
+import { buildStoriesUrl } from "../../util/search";
 
 const mockStories = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
   title: `Story Title ${i + 1}`,
   by: `Author ${i + 1}`,
   score: 100 - i,
-  url: `https://hacker-news.firebaseio.com/v0/item/${i + 1}.json`,
+  url: `https://example.com/story-${i + 1}`,
   time: 1750171646,
-  descendants: 0,
+  descendants: 12,
   kids: [],
   type: "story",
 }));
+
+const mockAlgoliaResponse = {
+  hits: mockStories.map((story) => ({
+    objectID: String(story.id),
+    story_id: story.id,
+    title: story.title,
+    author: story.by,
+    points: story.score,
+    num_comments: story.descendants,
+    created_at_i: story.time,
+    url: story.url,
+  })),
+};
 
 vi.mock("swr", () => {
   return {
@@ -24,36 +38,23 @@ vi.mock("swr", () => {
   };
 });
 
-vi.mock("../../util/fetcher", () => ({
-  fetcher: vi.fn((url: string) => {
-    const match = url.match(/item\/(\d+)\.json/);
-    const id = match ? Number(match[1]) : null;
-    const story = mockStories.find((s) => s.id === id);
-    return Promise.resolve(story);
-  }),
-}));
-
-vi.mock("../../util", () => ({
-  getRandomIdArray: () => mockStories.map((s) => s.id),
-}));
-
 const mockedUseSWR = useSWR as unknown as ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   vi.restoreAllMocks();
 
-  mockedUseSWR.mockImplementation((key: string) => {
-    if (key === "https://hacker-news.firebaseio.com/v0/topstories.json") {
+  mockedUseSWR.mockImplementation((key: string | null) => {
+    if (!key) {
       return {
-        data: mockStories.map((s) => s.id), // return array of story ids
+        data: undefined,
         error: undefined,
         isLoading: false,
       };
     }
 
-    if (key?.startsWith("https://hacker-news.firebaseio.com/v0/user/")) {
+    if (key.startsWith("https://hn.algolia.com/api/v1/search")) {
       return {
-        data: { id: "Author 1", karma: 42 }, // mock user data for StoryCard
+        data: mockAlgoliaResponse,
         error: undefined,
         isLoading: false,
       };
@@ -62,6 +63,17 @@ beforeEach(() => {
 });
 
 describe("Stories", () => {
+  test("fetches front page stories from Algolia", async () => {
+    render(<Stories />);
+    await screen.findAllByTestId("story-card");
+
+    expect(mockedUseSWR).toHaveBeenCalledWith(
+      buildStoriesUrl(),
+      expect.any(Function),
+      { revalidateOnFocus: false }
+    );
+  });
+
   test("renders loading component", async () => {
     mockedUseSWR.mockReturnValue({
       data: undefined,
@@ -93,39 +105,22 @@ describe("Stories", () => {
     const storyCards = await screen.findAllByTestId("story-card");
     expect(storyCards.length).toBe(10);
   });
+
+  test("renders empty state for search with no results", async () => {
+    mockedUseSWR.mockReturnValue({
+      data: { hits: [] },
+      error: undefined,
+      isLoading: false,
+    });
+
+    render(<Stories searchQuery="nonexistent" />);
+    expect(screen.getByText(/No stories found for/i)).toBeInTheDocument();
+    expect(screen.getByText(/nonexistent/)).toBeInTheDocument();
+  });
 });
 
 describe("Story Card", () => {
-  test("renders loading component", async () => {
-    mockedUseSWR.mockReturnValue({
-      data: undefined,
-      error: undefined,
-      isLoading: true,
-    });
-
-    render(<StoryCard data={mockStories[0]} />);
-    const loaderElements = await screen.findAllByTestId("karma-loader");
-    expect(loaderElements.length).toBe(1);
-  });
-
-  test("renders error component", async () => {
-    mockedUseSWR.mockReturnValue({
-      data: undefined,
-      error: { message: "Failed to fetch stories" },
-      isLoading: false,
-    });
-
-    render(<StoryCard data={mockStories[0]} />);
-    expect(screen.getByText(/Failed to load karma/i)).toBeInTheDocument();
-  });
-
   test("renders story card details", async () => {
-    mockedUseSWR.mockReturnValue({
-      data: { id: "Author 1", karma: 42 },
-      error: undefined,
-      isLoading: false,
-    });
-
     render(<StoryCard data={mockStories[0]} />);
 
     const expectedText = formatDistanceToNow(new Date(1750171646 * 1000), {
@@ -135,6 +130,6 @@ describe("Story Card", () => {
     expect(await screen.findByText("Author 1")).toBeInTheDocument();
     expect(await screen.findByText("100")).toBeInTheDocument();
     expect(await screen.findByText(expectedText)).toBeInTheDocument();
-    expect(await screen.findByText(/42 karma/i)).toBeInTheDocument();
+    expect(await screen.findByText(/12 comments/i)).toBeInTheDocument();
   });
 });
